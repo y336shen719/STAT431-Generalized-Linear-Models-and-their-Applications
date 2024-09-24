@@ -1,0 +1,856 @@
+---
+title: "stat431 assignment02"
+author: "Yiming Shen 20891774"
+date: "20/10/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+### (a)
+```{R}
+y <- rep(c(0,1,0,1,0,1,0,1), c(78,22,46,54,71,40,20,60))
+x1 <- rep(c(0,0,1,1,0,0,1,1), c(78,22,46,54,71,40,20,60))
+x2 <- rep(c(0,0,0,0,1,1,1,1), c(78,22,46,54,71,40,20,60))
+model <- glm(y ~ x1 + x2 + x1*x2, family = binomial(link = logit))
+summary(model)
+
+c <- 1.96
+# beta0 95%
+beta0_L <- -1.2657 - c*(0.2414)
+beta0_U <- -1.2657 + c*(0.2414)
+beta0_L
+beta0_U
+# beta1 95%
+beta1_L <- 1.4260 - c*(0.3139)
+beta1_U <- 1.4260 + c*(0.3139)
+beta1_L
+beta1_U
+# beta2 95%
+beta2_L <- 0.6919 - c*(0.3120)
+beta2_U <- 0.6919 + c*(0.3120)
+beta2_L
+beta2_U
+# beta3 95%
+beta3_L <- 0.2464 - c*(0.4520)
+beta3_U <- 0.2464 + c*(0.4520)
+beta3_L
+beta3_U
+
+# Fitted Values Estimated and Confidence Interval
+beta_est <- c(-1.2657,1.4260,0.6919,0.2464)
+
+## when X1=1 & X2=1 ##
+x_vector11 <- c(1,1,1,1)
+beta_fun <- t(x_vector11)%*%beta_est
+pie11 <- exp(beta_fun) / (1 + exp(beta_fun))
+pie11
+# 95% CI for beta_function
+beta_fun_L <- beta_fun - c * sqrt(t(x_vector11) %*% summary(model)$cov.unscaled %*% x_vector11)
+beta_fun_U <- beta_fun + c * sqrt(t(x_vector11) %*% summary(model)$cov.unscaled %*% x_vector11)
+# 95% CI for fitted value
+pie11_L <- exp(beta_fun_L) / (1 + exp(beta_fun_L))
+pie11_U <- exp(beta_fun_U) / (1 + exp(beta_fun_U))
+pie11_L
+pie11_U
+
+## when X1=1 & X2=0 ##
+x_vector10 <- c(1,1,0,0)
+beta_fun <- t(x_vector10)%*%beta_est
+pie10 <- exp(beta_fun) / (1 + exp(beta_fun))
+pie10
+# 95% CI for beta_function
+beta_fun_L <- beta_fun - c * sqrt(t(x_vector10) %*% summary(model)$cov.unscaled %*% x_vector10)
+beta_fun_U <- beta_fun + c * sqrt(t(x_vector10) %*% summary(model)$cov.unscaled %*% x_vector10)
+# 95% CI for fitted value
+pie10_L <- exp(beta_fun_L) / (1 + exp(beta_fun_L))
+pie10_U <- exp(beta_fun_U) / (1 + exp(beta_fun_U))
+pie10_L
+pie10_U
+
+## when X1=0 & X2=1 ##
+x_vector01 <- c(1,0,1,0)
+beta_fun <- t(x_vector01)%*%beta_est
+pie01 <- exp(beta_fun) / (1 + exp(beta_fun))
+pie01
+# 95% CI for beta_function
+beta_fun_L <- beta_fun - c * sqrt(t(x_vector01) %*% summary(model)$cov.unscaled %*% x_vector01)
+beta_fun_U <- beta_fun + c * sqrt(t(x_vector01) %*% summary(model)$cov.unscaled %*% x_vector01)
+# 95% CI for fitted value
+pie01_L <- exp(beta_fun_L) / (1 + exp(beta_fun_L))
+pie01_U <- exp(beta_fun_U) / (1 + exp(beta_fun_U))
+pie01_L
+pie01_U
+
+## when X1=0 & X2=0 ##
+x_vector00 <- c(1,0,0,0)
+beta_fun <- t(x_vector00)%*%beta_est
+pie00 <- exp(beta_fun) / (1 + exp(beta_fun))
+pie00
+# 95% CI for beta_function
+beta_fun_L <- beta_fun - c * sqrt(t(x_vector00) %*% summary(model)$cov.unscaled %*% x_vector00)
+beta_fun_U <- beta_fun + c * sqrt(t(x_vector00) %*% summary(model)$cov.unscaled %*% x_vector00)
+# 95% CI for fitted value
+pie00_L <- exp(beta_fun_L) / (1 + exp(beta_fun_L))
+pie00_U <- exp(beta_fun_U) / (1 + exp(beta_fun_U))
+pie00_L
+pie00_U
+```
+estimate of beta0 = -1.2657: estimated log odds of response Y when X1=X2=0 ; 95%C.I.: [-1.738844,-0.792556] 
+\newline
+estimate of beta1 = 1.4260: estimated log odds ratio of response Y when X1=1 vs X1=0 while keeping X2=0 ; 95%C.I.:[0.810756,2.041244]
+\newline
+estimate of beta2 = 0.6919: estimated log odds ratio of response Y when X2=1 vs X2=0 while keeping X1=0 ; 95%C.I.:[0.08038,1.30342]
+\newline
+estimate of beta3 = 0.2464: estimated difference between log odds ratio of response Y when X1=1 vs X1=0 while keeping
+X2=1 and log odds ratio of response Y when X1=1 vs X1=0 while keeping X2=0 ; 95%C.I:[ -0.63952,1.13232]
+\newline
+estimate of fitted value (when X1=1 X2=1) = 0.7499977 ; 95%C.I.:[0.6439456,0.83267]
+\newline
+estimate of fitted value (when X1=1 X2=0) = 0.5399894; 95%C.I.:[0.4420219,0.6349612]
+\newline
+estimate of fitted value (when X1=0 X2=1) = 0.3603605; 95%C.I.:[0.2766204,0.4535563]
+\newline
+estimate of fitted value (when X1=0 X2=0) = 0.2199942; 95%C.I.:[0.1494593,0.311621]
+
+
+\newpage
+### (b)
+```{R}
+model <- lm(y ~ x1*x2)
+summary(model)
+c <- qt(0.975, 400-5)
+
+# beta0 95%
+beta0_L <- 0.22000 - c*(0.04620)
+beta0_U <- 0.22000 + c*(0.04620)
+beta0_L
+beta0_U
+
+# beta1 95%
+beta1_L <- 0.32000 - c*(0.06533)
+beta1_U <- 0.32000 + c*(0.06533)
+beta1_L
+beta1_U
+
+# beta2 95%
+beta2_L <- 0.14036 - c*(0.06369)
+beta2_U <- 0.14036 + c*(0.06369)
+beta2_L
+beta2_U
+
+# beta3 95%
+beta3_L <- 0.06964 - c*(0.09412)
+beta3_U <- 0.06964 + c*(0.09412)
+beta3_L
+beta3_U
+
+# fitted values and confidence intervals
+# when X1=1 X2=1
+predict(model, interval = "confidence")[312,]
+# when X1=1 X2=0
+predict(model, interval = "confidence")[101,]
+# when X1=0 X2=1
+predict(model, interval = "confidence")[201,]
+# when X1=0 X2=0
+predict(model, interval = "confidence")[1,]
+
+
+
+```
+estimate of beta0 =0.22 : estimated mean of response Y when X1=X2=0 ; 95%C.I.: [0.1291714,0.3108286] 
+\newline
+estimate of beta1 =0.32 : estimated mean of response Y when X1=1 vs X1=0 while keeping X2=0 ; 95%C.I.:[0.191562,0.448438]
+\newline
+estimate of beta2 = 0.14036: estimated mean of response Y when X2=1 vs X2=0 while keeping X1=0 ; 95%C.I.:[0.01514623,0.2655738]
+\newline
+estimate of beta3 = 0.06964: estimated difference between mean of response Y when X1=1 vs X1=0 while keeping
+X2=1 and mean of response Y when X1=1 vs X1=0 while keeping X2=0 ; 95%C.I:[-0.1153988,0.2546788]
+\newline
+estimate of fitted value (when X1=1 X2=1) = 0.75 ; 95%C.I.:[0.6484546,0.8515454]
+\newline
+estimate of fitted value (when X1=1 X2=0) = 0.54; 95%C.I.:[0.4491751,0.6308249]
+\newline
+estimate of fitted value (when X1=0 X2=1) = 0.3603604; 95%C.I.:[0.2741532,0.4465676]
+\newline
+estimate of fitted value (when X1=0 X2=0) = 0.22; 95%C.I.:[0.1291751,0.3108249]
+
+\newpage
+### (d)
+For analysis in (a):
+\newline
+pros: Since all assumption of logistic regression model are satisfied, so
+those maximum likelihood estimators in analysis (a) are valid.
+\newline
+For analysis in (b):
+\newline
+pros: Compared with analysis (a), those coefficients have easier interpretation. (mean difference vs. odds ratio difference)
+\newline
+cons: The assumption of normality and constant variance are violated, so those 
+estimators might be not valid.
+\newline
+Propose a change: weighted least square regression
+\newline
+For analysis in (c):
+\newline
+pros: Compared with analysis (a), those coefficients have easier interpretation. (mean difference vs. odds ratio difference). Besides, all assumptionn of model are satisfied, so those estimators in analysis (c) are valid.
+
+
+\newpage
+## Qurstion (2)
+
+```{R}
+### (b)
+midpoint <-c(1.34, 1.60, 1.75, 1.85, 1.95, 2.00, 2.14, 2.25, 2.34)
+survived <- c(13,19,67,45,71,50,35,7,1)
+died <- c(0,0,2,5,8,20,31,49,12)
+resp <- cbind(survived, died)
+# fit logit link
+logit_model <- glm(resp ~ midpoint, family = binomial(link = "logit"))
+summary(logit_model)
+# fit probit link
+probit_model <- glm(resp ~ midpoint, family = binomial(link = "probit"))
+summary(probit_model)
+# fit log-log link
+cloglog_model <- glm(resp ~ midpoint, family = binomial(link = "cloglog"))
+summary(cloglog_model)
+
+
+```
+Interpretation:
+\newline
+For logit_model:
+\newline
+beta0_hat=21.989: the estimated log odds when the midpoints is zero (actually third-degree burn area is zero)
+\newline
+beta1_hat=-10.397: the estimated log odds ratio when the midpoint increases one unit
+\newline
+For probit_model:
+\newline
+beta0_hat=12.5444: the inverse CDF of N(0,1) for the probability of surviving when the midpoint is zero (burn area = 0)
+\newline
+beta1_hat=-5.9364: the estimated change of inverse CDF of N(0,1) for the probability of surviving when the midpoint
+increases one unit
+\newline
+For cloglog_model:
+\newline
+beta0_hat=11.0497: the estimated complimentary log log of the probability of surviving when the midpoint is zero (burn area = 0)
+\newline
+beta1_hat=-5.4184: the estimated change of complimentary log log of the probability of surviving when the midpoint
+is zero (burn area = 0)
+
+\newpage
+### (c)
+```{R}
+# logit model
+rd1 <- residuals.glm(logit_model,"deviance")
+fv1 <- logit_model$fitted.values
+plot(fv1,rd1,xlab="Fitted Value", ylim=c(-4,4),
+     ylab="Deviance Residuals",main="Deviance residuals vs. Fitted Probabilities (logit)")
+ abline(h=-2) ; abline(h=2) ;
+ 
+ # probit model
+ rd2 <- residuals.glm(probit_model,"deviance")
+ fv2 <- probit_model$fitted.values
+ plot(fv2,rd2,xlab="Fitted Value", ylim=c(-4,4),
+     ylab="Deviance Residuals",main="Deviance residuals vs. Fitted Probabilities (probit)")
+ abline(h=-2) ; abline(h=2) 
+ 
+ # c log-log model
+ rd3 <- residuals.glm(cloglog_model,"deviance")
+ fv3 <- cloglog_model$fitted.values
+ plot(fv3,rd3,xlab="Fitted Value", ylim=c(-4,4),
+     ylab="Deviance Residuals",main="Deviance residuals vs. Fitted Probabilities (c log-log)")
+ abline(h=-2) ; abline(h=2)
+
+
+```
+Conclusion: Based on 3 plots, we find that logit model is the best. Since for c log-log model, there are 2 points outside [-1.96, 1.96] range. Besides, all plots in logit model are closer to line 0 compared to probit model.
+
+\newpage
+### (d)
+```{R}
+# we select logit model
+pie <- 0.8
+beta0_hat <- 21.989
+beta1_hat <- -10.397
+
+x <- (log(pie/(1-pie))-beta0_hat) / beta1_hat
+x
+area <- exp(2) - 1
+area
+```
+Therefore, the area is estimated to be 6.389056
+
+\newpage
+
+## Question 3
+
+```{R}
+# Save the original .csv file in your R Working Directory
+# and then run this code block to input the data and
+# prepare it for our analysis.
+COVIDdata = read.csv("journal.pone.0245327.s010.csv")
+# Limit the data to students from NCSU and a restricted set
+# of explanatory variables
+COVIDdata_NCSU = COVIDdata[(!is.na(COVIDdata$Source) & (COVIDdata$Source ==
+  "NCState")), names(COVIDdata) %in% c("Health_General", "Hrs_Screen",
+  "Hrs_Outdoor", "Hrs_Exercise", "Class_Self", "Infected_Any",
+  "BMI", "Educ_College_Grad", "Age", "Classification_High",
+  "Ethnoracial_Group_White1_Asian2", "Age_18to25")]
+
+# Remove observations with missing Ethnoracial data (all
+# other variable are complete)
+COVIDdata_NCSU = COVIDdata_NCSU[!is.na(COVIDdata_NCSU$Ethnoracial_Group_White1_Asian2),]
+
+# clean up non-integer class values
+COVIDdata_NCSU$Class_Self <- round(COVIDdata_NCSU$Class_Self)
+# Create factor variables where necessary
+COVIDdata_NCSU$Infected_Any = factor(COVIDdata_NCSU$Infected_Any)
+COVIDdata_NCSU$Educ_College_Grad = factor(COVIDdata_NCSU$Educ_College_Grad)
+COVIDdata_NCSU$Ethnoracial_Group_White1_Asian2 = factor(COVIDdata_NCSU$Ethnoracial_Group_White1_Asian2)
+COVIDdata_NCSU$Age_18to25 = factor(COVIDdata_NCSU$Age_18to25)
+
+
+# str(COVIDdata_NCSU) # Display data set structure,
+# commented out to save space
+```
+
+### (a)
+```{R}
+# Fit a main effects logistic regression model
+modelA = glm(Classification_High ~ +Age + Ethnoracial_Group_White1_Asian2 +
+  Class_Self + Health_General + BMI + Hrs_Screen + Hrs_Outdoor +
+  Hrs_Exercise + Educ_College_Grad + Infected_Any, family = binomial(link = "logit"),
+  data = COVIDdata_NCSU)
+
+summary(modelA)
+c <- 1.96
+# estimated class_self = -0.163984
+exp_class_self <- exp(-0.163984)
+exp_class_self_L <- exp(-0.163984 - c*0.061946)
+exp_class_self_U <- exp(-0.163984 + c*0.061946)
+exp_class_self
+exp_class_self_L
+exp_class_self_U
+# estimated infected_any = 0.444331
+exp_infected_any <- exp(0.444331)
+exp_infected_any_L <- exp(0.444331 - c*0.138834)
+exp_infected_any_U <- exp(0.444331 + c*0.138834)
+exp_infected_any
+exp_infected_any_L
+exp_infected_any_U
+# estimated Ethnoracial_Group_White1_Asian21 = 0.287848
+exp_asian21 <- exp(0.287848)
+exp_asian21_L <- exp(0.287848 - c*0.198502)
+exp_asian21_U <- exp(0.287848 + c*0.198502)
+exp_asian21
+exp_asian21_L
+exp_asian21_U
+# estimated Ethnoracial_Group_White1_Asian22 = 0.439006
+exp_asian22 <- exp(0.439006)
+exp_asian22_L <- exp(0.439006 - c*0.233072)
+exp_asian22_U <- exp(0.439006 + c*0.233072)
+exp_asian22
+exp_asian22_L
+exp_asian22_U
+```
+Interpretation:
+
+estimated exp class self=0.8487556: when remaining other factors unchanged, as the self-reported class increases one level, the odds of high psychological impact is expected to be 0.8487556 times as original odds. The 95% C.I is [0.7517149,0.9583235]
+
+estimated exp infected any=1.559447: when remaining other factors unchanged, the odds of high psychological impact 
+if knowing some infected is 1.559447 times as the odds of high psychological impact without knowing some infected.
+The 95% C.I is [1.187935,2.047144]
+
+estimated exp asian21=1.333555: when remainning other factors unchanged, the odds of high psychological impact on while people is 1.333555 times as the odds of high psychological impact on black or hispanic.
+The 95% C.I is [0.9037379,1.967792]
+
+estimated exp asian22=1.551165: when remaining other factors unchanged, the odds of high psychological impact on asian is
+1.551165 times of the odds as high psychological impact on black or hispanic.
+The 95% C.I is [0.9823426,2.449361]
+
+
+
+
+\newpage
+### (c)
+```{R}
+# WE found that beta1 - beta2 menas the 22-32 vs. 33-44
+estimated_diff <- 0.226878 - 0.605891
+# find variance for 22-32, 33-44 and their covariance
+summary(modelA)$cov.unscaled
+
+var_diff <- 0.0261324461 + 0.1108105523 - 2*0.0054664518
+# 95% C.I for difference
+L <- estimated_diff - 1.96*sqrt(var_diff)
+U <- estimated_diff + 1.96*sqrt(var_diff)
+# 95% C.I for exp(difference)
+exp_L <-exp(L)
+exp_U <-exp(U)
+exp_L
+exp_U
+
+
+
+```
+Therefore, the 95% C.I is [0.3413756,1.372654]
+
+\newpage
+### (d)
+```{R}
+modelD <- glm(Classification_High ~ +Age + Ethnoracial_Group_White1_Asian2 +
+  factor(Class_Self) + Health_General + BMI + Hrs_Screen + Hrs_Outdoor +
+  Hrs_Exercise + Educ_College_Grad + Infected_Any, family = binomial(link = "logit"),
+  data = COVIDdata_NCSU)
+summary(modelD)
+```
+
+
+\newpage
+### (e)
+```{R}
+beta <- modelA$coefficients
+x_vector <- c(1,0,1,0,0,1,0,1,5,28,
+              median(COVIDdata_NCSU$Hrs_Screen),
+              median(COVIDdata_NCSU$Hrs_Outdoor),
+              median(COVIDdata_NCSU$Hrs_Exercise),1,0)
+beta_fun <- t(x_vector)%*%beta
+pie_est <- exp(beta_fun) / (exp(beta_fun)+1)
+pie_est
+              
+```
+
+Therefore, the estimated probability is 0.5537449
+
+\newpage
+## Question 4
+
+```{R}
+N <- 10000
+x <- rbinom(N,1,0.25)
+z <- rnorm(N)
+beta0 <- -2
+beta1 <- 1
+beta2 <- 0.5
+n <- 1000
+num_iterations <- 2000
+
+# Create a list to store results
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0 + beta1*x + beta2*z) / (1 + exp(beta0 + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  
+  sample <- data[sample(N, n),]
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat <- mean(beta0_vector)
+beta0_hat
+beta1_hat <- mean(beta1_vector)
+beta1_hat
+beta2_hat <- mean(beta2_vector)
+beta2_hat
+beta0_sd <- sd(beta0_vector)
+beta0_sd
+beta1_sd <- sd(beta1_vector)
+beta1_sd
+beta2_sd <- sd(beta2_vector)
+beta2_sd
+```
+
+### (a)
+```{R}
+# let beta0_1 = -1
+beta0_1 <- -1
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0_1 + beta1*x + beta2*z) / (1 + exp(beta0_1 + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  
+  sample <- data[sample(N, n),]
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_1 <- mean(beta0_vector)
+beta0_hat_1
+beta1_hat_1 <- mean(beta1_vector)
+beta1_hat_1
+beta2_hat_1 <- mean(beta2_vector)
+beta2_hat_1
+beta0_sd_1 <- sd(beta0_vector)
+beta0_sd_1
+beta1_sd_1 <- sd(beta1_vector)
+beta1_sd_1
+beta2_sd_1 <- sd(beta2_vector)
+beta2_sd_1
+
+# let beta0_2 = 0
+beta0_2 <- 0
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0_2 + beta1*x + beta2*z) / (1 + exp(beta0_2 + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  
+  sample <- data[sample(N, n),]
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_2 <- mean(beta0_vector)
+beta0_hat_2
+beta1_hat_2 <- mean(beta1_vector)
+beta1_hat_2
+beta2_hat_2 <- mean(beta2_vector)
+beta2_hat_2
+beta0_sd_2 <- sd(beta0_vector)
+beta0_sd_2
+beta1_sd_2 <- sd(beta1_vector)
+beta1_sd_2
+beta2_sd_2 <- sd(beta2_vector)
+beta2_sd_2
+
+# let beta0_3 = -3
+beta0_3 <- -3
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0_3 + beta1*x + beta2*z) / (1 + exp(beta0_3 + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  
+  sample <- data[sample(N, n),]
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_3 <- mean(beta0_vector)
+beta0_hat_3
+beta1_hat_3 <- mean(beta1_vector)
+beta1_hat_3
+beta2_hat_3 <- mean(beta2_vector)
+beta2_hat_3
+beta0_sd_3 <- sd(beta0_vector)
+beta0_sd_3
+beta1_sd_3 <- sd(beta1_vector)
+beta1_sd_3
+beta2_sd_3 <- sd(beta2_vector)
+beta2_sd_3
+
+
+```
+Conclusion: After repeat simulation with different beta0, I find that the estimates of beta1 and beta2 are almost
+unchanged and pretty close to real values no matter the value of beta0, which shows that they are unbiased
+Meanwhile, as the beta0 gets smaller, the standard deviation of estimates of beta1 and beta2 will increase, which are unbiased and the uncertainty is affected by values of beta0.
+
+\newpage
+### (c)
+```{R}
+# when beta0 = -1
+beta0_1cc <- -1
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0_1cc + beta1*x + beta2*z) / (1 + exp(beta0_1cc + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  data1 <- data[data$y==1,]
+  data0 <- data[data$y==0,]
+  
+  sample1 <- data1[sample(N, 500),]
+  sample0 <- data0[sample(N, 500),]
+  sample <- rbind(sample1,sample0)
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_1cc <- mean(beta0_vector)
+beta0_hat_1cc
+beta1_hat_1cc <- mean(beta1_vector)
+beta1_hat_1cc
+beta2_hat_1cc <- mean(beta2_vector)
+beta2_hat_1cc
+beta0_sd_1cc <- sd(beta0_vector)
+beta0_sd_1cc
+beta1_sd_1cc <- sd(beta1_vector)
+beta1_sd_1cc
+beta2_sd_1cc <- sd(beta2_vector)
+beta2_sd_1cc
+
+
+# when beta0 = 0
+beta0_2cc <- 0
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0_2cc + beta1*x + beta2*z) / (1 + exp(beta0_2cc + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  data1 <- data[data$y==1,]
+  data0 <- data[data$y==0,]
+  
+  sample1 <- data1[sample(N, 500),]
+  sample0 <- data0[sample(N, 500),]
+  sample <- rbind(sample1,sample0)
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_2cc <- mean(beta0_vector)
+beta0_hat_2cc
+beta1_hat_2cc <- mean(beta1_vector)
+beta1_hat_2cc
+beta2_hat_2cc <- mean(beta2_vector)
+beta2_hat_2cc
+beta0_sd_2cc <- sd(beta0_vector)
+beta0_sd_2cc
+beta1_sd_2cc <- sd(beta1_vector)
+beta1_sd_2cc
+beta2_sd_2cc <- sd(beta2_vector)
+beta2_sd_2cc
+
+
+# when beta0 = -3
+beta0_3cc <- -3
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, exp(beta0_3cc + beta1*x + beta2*z) / (1 + exp(beta0_3cc + beta1*x + beta2*z)))
+  data <- data.frame(x=x, z=z, y=y)
+  data1 <- data[data$y==1,]
+  data0 <- data[data$y==0,]
+  
+  sample1 <- data1[sample(N, 500),]
+  sample0 <- data0[sample(N, 500),]
+  sample <- rbind(sample1,sample0)
+  
+  model <- glm(y ~ x + z, family = binomial(link = "logit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_3cc <- mean(beta0_vector)
+beta0_hat_3cc
+beta1_hat_3cc <- mean(beta1_vector)
+beta1_hat_3cc
+beta2_hat_3cc <- mean(beta2_vector)
+beta2_hat_3cc
+beta0_sd_3cc <- sd(beta0_vector)
+beta0_sd_3cc
+beta1_sd_3cc <- sd(beta1_vector)
+beta1_sd_3cc
+beta2_sd_3cc <- sd(beta2_vector)
+beta2_sd_3cc
+
+```
+Conclusion, based on different beta0 values, we find that the estimates of beta1 and beta2 are relatively fixed
+and close to the real value no matter the values of beta0, which means that they are unbiased.
+Meanwhile, the estimate of beta0 will be changed with the change of beta0 value, which is biased.
+The standard deviation of estimates are relatively fixed no matter the values of beta0, which is unbiased.
+
+\newpage
+### (d)
+In the situation that number of values generated by random sampling simulation study is not balanced.
+For example, sometimes we have a lot of results with Y=1 but only a few results with Y=0. In such cases,
+we can use case control simulation study to reduce the uncertainty.
+\newpage
+### (e)
+```{R}
+N <- 10000
+num_iterations <- 2000
+beta1 <- 1
+beta2 <- 0.5
+x <- rbinom(N,1,0.25)
+z <- rnorm(N)
+
+# use probit link
+# when beta0 = -1
+beta0_1pl <- -1
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, pnorm(beta0_1pl + beta1*x + beta2*z))
+  data <- data.frame(x=x, z=z, y=y)
+  data1 <- data[data$y==1,]
+  data0 <- data[data$y==0,]
+  
+  sample1 <- data1[sample(N, 500),]
+  sample0 <- data0[sample(N, 500),]
+  sample <- rbind(sample1,sample0)
+  
+  model <- glm(y ~ x + z, family = binomial(link = "probit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_1pl <- mean(beta0_vector)
+beta0_hat_1pl
+beta1_hat_1pl <- mean(beta1_vector)
+beta1_hat_1pl
+beta2_hat_1pl <- mean(beta2_vector)
+beta2_hat_1pl
+beta0_sd_1pl <- sd(beta0_vector)
+beta0_sd_1pl
+beta1_sd_1pl <- sd(beta1_vector)
+beta1_sd_1pl
+beta2_sd_1pl <- sd(beta2_vector)
+beta2_sd_1pl
+
+
+# when beta0 = 0
+beta0_2pl <- 0
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, pnorm(beta0_2pl + beta1*x + beta2*z))
+  data <- data.frame(x=x, z=z, y=y)
+  data1 <- data[data$y==1,]
+  data0 <- data[data$y==0,]
+  
+  sample1 <- data1[sample(N, 500),]
+  sample0 <- data0[sample(N, 500),]
+  sample <- rbind(sample1,sample0)
+  
+  model <- glm(y ~ x + z, family = binomial(link = "probit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_2pl <- mean(beta0_vector)
+beta0_hat_2pl
+beta1_hat_2pl <- mean(beta1_vector)
+beta1_hat_2pl
+beta2_hat_2pl <- mean(beta2_vector)
+beta2_hat_2pl
+beta0_sd_2pl <- sd(beta0_vector)
+beta0_sd_2pl
+beta1_sd_2pl <- sd(beta1_vector)
+beta1_sd_2pl
+beta2_sd_2pl <- sd(beta2_vector)
+beta2_sd_2pl
+
+
+# when beta0 = -3
+beta0_3pl <- -3
+beta0_vector <- c(rep(NULL,num_iterations))
+beta1_vector <- c(rep(NULL,num_iterations))
+beta2_vector <- c(rep(NULL,num_iterations))
+
+# Run the loop
+for (i in 1:num_iterations) {
+  
+  y <- rbinom(N, 1, pnorm(beta0_3pl + beta1*x + beta2*z))
+  data <- data.frame(x=x, z=z, y=y)
+  data1 <- data[data$y==1,]
+  data0 <- data[data$y==0,]
+  
+  sample1 <- data1[sample(N, 500),]
+  sample0 <- data0[sample(N, 500),]
+  sample <- rbind(sample1,sample0)
+  
+  model <- glm(y ~ x + z, family = binomial(link = "probit"), data = sample)
+  
+  beta0_vector[i] <- summary(model)$coefficients[1,1]
+  beta1_vector[i] <- summary(model)$coefficients[2,1]
+  beta2_vector[i] <- summary(model)$coefficients[3,1]
+}
+
+# investigate bias and uncertainty
+beta0_hat_3pl <- mean(beta0_vector)
+beta0_hat_3pl
+beta1_hat_3pl <- mean(beta1_vector)
+beta1_hat_3pl
+beta2_hat_3pl <- mean(beta2_vector)
+beta2_hat_3pl
+beta0_sd_3pl <- sd(beta0_vector)
+beta0_sd_3pl
+beta1_sd_3pl <- sd(beta1_vector)
+beta1_sd_3pl
+beta2_sd_3pl <- sd(beta2_vector)
+beta2_sd_3pl
+
+```
+Conclusion: The relationship we found by probit link is different with by logit link.
+As the value of beta0 decreases, the bias of beta1 and beta2's estimates get larger, which are unbiased.
+And the standard deviation get smaller actually, which are unbiased as well.

@@ -1,0 +1,223 @@
+---
+title: "stat431 a3 q2"
+author: "Yiming Shen 20891774"
+date: "16/11/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(GLMsData)
+data(polyps)
+polyps
+```
+
+
+### (a)
+```{R}
+# hist for treatment
+hist(polyps$Number[polyps$Treatment=="Drug"],
+     xlab="Number of Polyps",
+     main="The number of polyps in the treatment group",
+     breaks=40,
+     xlim=c(0,40),
+     ylim=c(0,0.4),
+     probability = T)
+
+points(x=seq(0,40),y=dpois(x=seq(0,40),lambda = mean(polyps$Number[polyps$Treatment=="Drug"])))
+
+# hist for placebo
+hist(polyps$Number[polyps$Treatment=="Placebo"],
+     xlab="Number of Polyps",
+     main="The number of polyps in the placebo group",
+     breaks=40,
+     xlim=c(0,70),
+     ylim=c(0,0.4),
+     probability = T)
+
+points(x=seq(0,70),y=dpois(x=seq(0,70),lambda = mean(polyps$Number[polyps$Treatment=="Placebo"])))
+```
+
+Comments for 'hist for treatment': The observed distribution is not fitted with the poisson distribution.
+More observations are concentrated around 0 while the poisson distribution has the highest predicated probability
+around range 5-15
+
+Comments for 'hist for placebo': The observed distribution is relatively fitted with the poisson distribution.
+Observations are concentrated around the range 25-35 while the poisson distribution has the highest predicated 
+probability around the same range.
+
+
+\newpage
+
+### (b)
+```{R}
+# Fit model
+mod <- glm(Number ~ Treatment + Age, family = poisson, data = polyps)
+summary(mod)
+
+# Plot the Deviance residuals
+rd <- residuals.glm(mod,"deviance")
+fv <- mod$fitted.values
+plot(fv,rd,xlab="Fitted Value", ylim=c(-4,4),
+     ylab="Deviance Residuals",main="Plot of Deviance Residuals")
+abline(h=-2)
+abline(h=2)
+```
+
+Evidence of overdispersion: Since D=179.54 and (n-p)=17, D/(n-p) >> 1, so there is
+evidence of overdispersion. Besides, we observe that there are a lot of points
+are distributed outside (-1.96,+1.96) based on the plot of deviance residuals, which means
+that the variance is very large and proves overdispersion as well.
+
+
+\newpage
+
+### (c)
+Firstly, we estimate the dispersion parameter.
+```{R}
+# by using ad-hoc method
+D <- 179.54
+df <- 17
+estimate_dispersion <- D/df
+estimate_dispersion
+```
+
+Does accounting for the overdispersion change the treatmtent-outcome conclusion?
+We conduct the hypothesis: H0: beta1=0 vs. HA: beta1!=0 under ad-hoc method.
+```{R}
+estimate_beta1 <- 1.359083
+se <- 0.117643
+se_adj <- sqrt(estimate_dispersion) * se
+t_adj <- estimate_beta1/se_adj
+t_adj
+p_value_adj <- 2 * (1-pnorm(abs(t_adj)))
+p_value_adj
+```
+
+Comments: Since p-value(adj) still < 0.05, accounting for the overdispersion does not change our conclusion that
+there is a significant treatment-outcome association.
+
+How about age-outcome conclusion?
+We conduct the hypothesis: H0: beta2=0 vs. HA: beta2!=0 under ad-hoc method.
+```{r}
+estimate_beta2 <- -0.038830
+se2 <- 0.005955
+se2_adj <- sqrt(estimate_dispersion) * se2
+t_adj2 <- estimate_beta2/se2_adj
+t_adj2
+p_value_adj2 <- 2 * (1-pnorm(abs(t_adj2)))
+p_value_adj2
+```
+
+Comments: Since p-value(adj) still < 0.05, accounting for the overdispersion does not change our conclusion that
+there is a significant age-outcome association.
+
+\newpage
+
+### (d)
+```{r}
+library(MASS)
+
+# we fit negative binomial
+mod2 <- glm.nb(Number ~ Treatment + Age, data = polyps, link = log,
+               init.theta = 1, trace = F)
+summary(mod2)
+
+
+# plot deviance residual 
+rd2 <- residuals.glm(mod2,"deviance")
+fv2 <- mod2$fitted.values
+plot(fv2,rd2,xlab="Fitted Value", ylim=c(-4,4),
+     ylab="Deviance Residuals",main="Plot of Deviance Residuals")
+abline(h=-2)
+abline(h=2)
+```
+
+Comments: Based on plot of deviance residual, we found that most points
+distributed within range (-1.96,+1.96), which means that the model is proper.
+So I am satisfied with this model.
+
+\newpage
+
+### (e)
+
+Based on (b) and (d), our final model is negative binomial glm.
+
+For beta0 (intercept)
+```{R}
+est_beta0 <- 3.15791
+se_beta0 <- 0.55753
+exp_est_beta0 <- exp(est_beta0)
+exp_est_beta0
+
+# 95% CI
+c <- 1.96
+L <- est_beta0 - c * se_beta0
+U <- est_beta0 + c * se_beta0
+exp(L)
+exp(U)
+```
+
+Interpretation: When using drug for treatment and at age 0, the expected
+number of polyps observed (rate/risk) is 23.52138 in a unit time. The 95% CI is
+[7.88649, 70.15231].
+
+
+For beta1 
+```{r}
+est_beta1 <- 1.36812
+se_beta1 <- 0.36903
+exp_est_beta1 <- exp(est_beta1)
+exp_est_beta1
+
+# 95% CI
+L <- est_beta1 - c * se_beta1
+U <- est_beta1 + c * se_beta1
+exp(L)
+exp(U)
+```
+
+Interpretation: The expected number of polyps observed when using placebo (risk) 
+will be 3.927959 times of the expected number of polyps observed 
+when using drug (risk), while holding other variables unchanged.
+The 95% CI is [1.905646, 8.096394].
+
+
+For beta2
+```{R}
+est_beta2 <- -0.03856
+se_beta2 <- 0.02095
+exp_est_beta2 <- exp(est_beta2)
+exp_est_beta2
+
+# 95% CI
+L <- est_beta2 - c * se_beta2
+U <- est_beta2 + c * se_beta2
+exp(L)
+exp(U)
+```
+
+Interpretation: When age increase 1 and holding other variables unchanged, the 
+expected number of polyps observed in next year (risk at age+1) will be
+0.962174 times of the expected number of polyps observed in this year (risk at age).
+The 95% CI is [0.9234654, 1.002505].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

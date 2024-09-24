@@ -1,0 +1,100 @@
+---
+title: "stat431 q3 q3"
+author: "Yiming Shen 20891774"
+date: "18/11/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Access the NMES1988 dataset and print the first few observations
+library(AER) # warnings are OK
+data(NMES1988)
+
+head(NMES1988)
+help(NMES1988)
+```
+
+
+### (c)
+```{r}
+# hist for visits
+hist(NMES1988$visits,
+     xlab="Number of visits",
+     main="The number of visits for health care",
+     breaks=40,
+     xlim=c(0,40),
+     ylim=c(0,0.2),
+     probability = T)
+
+# Poisson Model
+points(x=seq(0,40),y=dpois(x=seq(0,40),lambda = mean(NMES1988$visits)))
+```
+
+Comments: Based on the graphs, we found that the observation of 0 has much
+higher density than what we expected under Poisson model. Therefore, there
+are more respondents with 0 visits than might be expected under a Poisson model.
+
+
+\newpage
+
+### (d)
+```{r}
+# code for part (e)
+require(pscl)
+myZIP = zeroinfl(visits ~ chronic + health + insurance | chronic + insurance, data = NMES1988)
+summary(myZIP)
+
+```
+```{R}
+# chronic in Poisson part
+estimate_chronic_poi <- 0.11868
+exp(estimate_chronic_poi)
+
+```
+
+
+Interpretation: When number of chronic conditions increases one and holding
+other variables unchanged, the expected number of physician office visits 
+(rate) with current number of chronic plus one will be 1.12601 times of the 
+expected number of physician office visits (rate) with current number of chronic.
+
+
+```{r}
+# poor health in Poisson part
+estimate_poorhealth_poi <- 0.29470
+exp(estimate_poorhealth_poi)
+```
+
+Interpretation: The expected number of physician office visits (rate) under
+poor self-perceived health status is 1.342723 times of the expected number
+of physician office visits (rate) under average self-perceived health status, 
+while holding other variables unchanged.
+
+```{r}
+# intercept in logistic part
+estimate_intercept_log <- -0.37426
+exp(estimate_intercept_log)
+
+```
+
+Interpretation: When the number of chronic conditions is 0 and without private
+insurance coverage, the odds of 0 physician office visit is 0.6877981, while 
+holding other variables unchanged.
+
+
+```{r}
+# insurance in logistic part
+estimate_insurance_log <- -0.88314
+exp(estimate_insurance_log)
+
+```
+
+Interpretation: The odds ratio of 0 physician office visit with private insurance
+coverage VS. without private insurance coverage is 0.4134825, while holding 
+other variables unchanged.
+
+

@@ -1,0 +1,103 @@
+---
+title: "stat431 a3 q1"
+author: "Yiming Shen 20891774"
+date: "16/11/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{R}
+library(GLMsData) # Load the library (if unavailable use install.packages())
+
+data(danishlc) # Danish lung cancer incidence data
+
+# By default ">74" is the comparison group for Age. Here we redefine the levels of Age so they are ordered 
+danishlc$Age = C(factor(danishlc$Age, levels=c("40-54", "55-59", "60-64", "65-69", "70-74", ">74"), ordered=T ), treatment)
+
+# Fit the main effects log linear model
+model1 = glm(Cases ~ Age + City + offset(log(Pop)), family=poisson, data=danishlc)
+
+
+summary(model1)
+
+```
+
+### (a)
+```{R}
+estimate_beta0 <- -5.6321
+estimate_beta1 <- 1.1010
+estimate_beta7 <- -0.3715
+m <- 1050
+estimate_miu <- exp(estimate_beta0+estimate_beta1+estimate_beta7)*m
+estimate_miu
+```
+
+\newpage
+
+### (b)
+```{r}
+estimate_beta4 <- 1.8569
+relative_increase <- exp(estimate_beta4)
+relative_increase
+
+# 95% CI for beta4
+c <- 1.96
+se <- 0.2353
+L <- estimate_beta4 - c*se
+U <- estimate_beta4 + c*se
+
+# 95% CI for Relative Increase
+exp(L)
+exp(U)
+```
+
+\newpage
+
+### (c)
+```{r}
+D <- 23.447
+df <- 15
+p_value <- 1-pchisq(D,df)
+p_value
+```
+
+\newpage
+
+### (d)
+```{r}
+estimate_miu
+m
+
+# rate per person-year in 1970
+estimate_miu/ (3*m)
+
+# rate per 100000 person-years in 1970
+p <- 100000
+estimate_miu/ (3*m) * p
+
+```
+
+\newpage
+
+### (e)
+```{R}
+# Fit the main effects logistic regression model based on Cases/Pop
+model2 = glm(Cases/Pop ~ Age + City, weights = Pop,
+             family=binomial(link = logit), data=danishlc)
+
+
+summary(model2)
+```
+
+Comments: Comparing to the Poisson GLM fit above (model1), we found that 
+all the estimates of coefficient, standard errors are very similar in 
+both model1 and model2, and the significance levels for each factors in both 
+models are the same.
+
+
+
+
+
